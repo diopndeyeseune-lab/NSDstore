@@ -9,4 +9,5 @@
         {{ form.as_p }}
         <button type="submit">Se connecter</button>
     </form>
+    <p class="lien-auth-croise">Vous n'avez pas encore de compte ? <a href="{% url 'comptes:inscription' %}">S'inscrire</a></p>
 {% endblock %}

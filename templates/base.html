@@ -42,9 +42,6 @@
                 {% csrf_token %}
                 <button type="submit">Déconnexion ({{ user.username }})</button>
             </form>
-        {% else %}
-            <a href="{% url 'comptes:login' %}">Connexion</a>
-            <a href="{% url 'comptes:inscription' %}">Inscription</a>
         {% endif %}
     </nav>
 

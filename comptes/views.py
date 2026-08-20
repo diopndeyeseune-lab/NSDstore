@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 
@@ -11,7 +12,18 @@ def inscription(request):
     if request.method == 'POST':
         form = InscriptionForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            email = form.cleaned_data['email']
+            ancien_compte_inactif = User.objects.filter(username=email, is_active=False).first()
+            if ancien_compte_inactif:
+                # Compte cree lors d'une tentative precedente jamais confirmee
+                # (ex. email de confirmation non recu) : on le reinitialise
+                # avec le nouveau mot de passe plutot que de bloquer l'utilisateur.
+                user = ancien_compte_inactif
+                user.set_password(form.cleaned_data['password1'])
+                user.save()
+                ConfirmationEmail.objects.filter(utilisateur=user).delete()
+            else:
+                user = form.save()
             code = ConfirmationEmail.generer_code()
             ConfirmationEmail.objects.create(utilisateur=user, code=code)
             send_mail(
