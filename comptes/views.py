@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -6,6 +8,8 @@ from django.shortcuts import redirect, render
 
 from .forms import CodeConfirmationForm, InscriptionForm
 from .models import ConfirmationEmail
+
+logger = logging.getLogger(__name__)
 
 
 def inscription(request):
@@ -26,12 +30,23 @@ def inscription(request):
                 user = form.save()
             code = ConfirmationEmail.generer_code()
             ConfirmationEmail.objects.create(utilisateur=user, code=code)
-            send_mail(
-                "Confirmez votre compte Seunegui Shades",
-                f"Votre code de confirmation est : {code}",
-                None,
-                [user.email],
-            )
+            try:
+                send_mail(
+                    "Confirmez votre compte Seunegui Shades",
+                    f"Votre code de confirmation est : {code}",
+                    None,
+                    [user.email],
+                )
+            except Exception:
+                # L'inscription ne doit jamais echouer a cause d'un souci
+                # d'envoi d'email (SMTP lent/bloque, etc.) : le compte et le
+                # code existent deja en base, on continue le parcours.
+                logger.exception("Echec de l'envoi de l'email de confirmation pour %s", user.username)
+                messages.warning(
+                    request,
+                    "Votre compte a été créé mais l'email de confirmation n'a pas pu être envoyé. "
+                    "Contactez-nous si vous ne recevez pas votre code."
+                )
             request.session['utilisateur_a_confirmer'] = user.id
             return redirect('comptes:confirmer_email')
     else:

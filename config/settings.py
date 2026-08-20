@@ -129,6 +129,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+# Sans delai, une connexion SMTP qui reste bloquee (frequent sur certains
+# hebergeurs) fait planter le worker Gunicorn entier au bout de 30s au lieu
+# d'echouer proprement. On coupe court bien avant.
+EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 
 SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
