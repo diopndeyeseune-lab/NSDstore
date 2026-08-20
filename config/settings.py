@@ -93,8 +93,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # la plateforme d'hebergement fournit directement DATABASE_URL (Neon,
 # Render...), qui prend le dessus automatiquement.
 _url_db_locale = (
-    f"postgresql://{config('DB_USER')}:{config('DB_PASSWORD')}"
-    f"@{config('DB_HOST')}:{config('DB_PORT')}/{config('DB_NAME')}"
+    f"postgresql://{config('DB_USER', default='')}:{config('DB_PASSWORD', default='')}"
+    f"@{config('DB_HOST', default='')}:{config('DB_PORT', default='')}/{config('DB_NAME', default='')}"
 )
 
 DATABASES = {
