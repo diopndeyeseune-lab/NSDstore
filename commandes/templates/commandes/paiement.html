@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Paiement - Commande #{{ commande.id }}{% endblock %}
+
+{% block content %}
+    <h1>Paiement de la commande #{{ commande.id }}</h1>
+    <p>Sous-total : {{ commande.sous_total }} FCFA</p>
+    <p>Livraison ({{ commande.zone_livraison.nom }}) : {{ commande.frais_livraison }} FCFA</p>
+    <p><strong>Total à payer : {{ commande.total }} FCFA</strong></p>
+
+    <h2>Mode de paiement</h2>
+
+    <form method="post" action="{% url 'commandes:confirmer_paiement' commande.id %}">
+        {% csrf_token %}
+
+        <div class="moyens-paiement">
+            <label class="moyen-paiement">
+                <span class="moyen-paiement-gauche">
+                    <input type="radio" name="methode" value="ESPECES" checked>
+                    <span>Paiement à la livraison</span>
+                </span>
+            </label>
+
+            <label class="moyen-paiement">
+                <span class="moyen-paiement-gauche">
+                    <input type="radio" name="methode" value="WAVE">
+                    <span>Wave</span>
+                </span>
+                <span class="moyen-paiement-logo">
+                    <img src="{% static 'img/wave.jpeg' %}" alt="Wave">
+                </span>
+            </label>
+
+            <label class="moyen-paiement">
+                <span class="moyen-paiement-gauche">
+                    <input type="radio" name="methode" value="ORANGE_MONEY">
+                    <span>Orange Money</span>
+                </span>
+                <span class="moyen-paiement-logo">
+                    <img src="{% static 'img/orange-money.jpeg' %}" alt="Orange Money">
+                </span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-commander">Commander</button>
+    </form>
+{% endblock %}

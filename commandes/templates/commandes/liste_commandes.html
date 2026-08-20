@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes commandes{% endblock %}
+
+{% block content %}
+    <h1>Mes commandes</h1>
+
+    <div class="commandes-liste">
+        {% for commande in commandes %}
+            <a href="{% url 'commandes:detail_commande' commande.id %}" class="commande-carte">
+                <div class="commande-carte-entete">
+                    <div>
+                        <span class="commande-numero">#{{ commande.numero }}</span>
+                        <span class="commande-date">{{ commande.date_commande|date:"d/m/Y" }}</span>
+                    </div>
+                    <span class="badge-statut badge-statut-{{ commande.statut|lower }}">{{ commande.get_statut_display }}</span>
+                </div>
+
+                <div class="commande-carte-produits">
+                    {% for ligne in commande.lignes.all|slice:":4" %}
+                        {% with image=ligne.produit.images.first %}
+                            {% if image %}
+                                <img src="{{ image.image.url }}" alt="{{ ligne.produit.nom }}">
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    {% if commande.lignes.count > 4 %}
+                        <span class="commande-carte-plus">+{{ commande.lignes.count|add:"-4" }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="commande-carte-pied">
+                    <span>{{ commande.get_mode_paiement_display|default:"Paiement non choisi" }}</span>
+                    <span>{{ commande.zone_livraison.nom|default:"" }}</span>
+                    <strong>{{ commande.total }} FCFA</strong>
+                </div>
+            </a>
+        {% empty %}
+            <p>Aucune commande pour l'instant.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

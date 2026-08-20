@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Livraison{% endblock %}
+
+{% block content %}
+    <h1>Informations de livraison</h1>
+
+    <ul>
+        {% for ligne in panier.lignes.all %}
+            <li>{{ ligne.produit.nom }} - quantité : {{ ligne.quantite }} - sous-total : {{ ligne.sous_total }} FCFA</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" action="{% url 'commandes:valider_commande' %}" id="form-checkout">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div id="recap-total">
+            <p>Sous-total : <span id="recap-sous-total">{{ panier.total }}</span> FCFA</p>
+            <p>Livraison : <span id="recap-livraison">0</span> FCFA</p>
+            <p><strong>Total à payer : <span id="recap-total-general">{{ panier.total }}</span> FCFA</strong></p>
+        </div>
+
+        <button type="submit">Continuer vers le paiement</button>
+    </form>
+
+    <script>
+        const sousTotal = parseFloat({{ sous_total_json|safe }});
+        const tarifsZones = {{ tarifs_zones_json|safe }};
+        const selectZone = document.getElementById('id_zone_livraison');
+
+        function majTotal() {
+            const tarif = parseFloat(tarifsZones[selectZone.value] || 0);
+            document.getElementById('recap-livraison').textContent = tarif;
+            document.getElementById('recap-total-general').textContent = sousTotal + tarif;
+        }
+
+        selectZone.addEventListener('change', majTotal);
+        majTotal();
+    </script>
+{% endblock %}

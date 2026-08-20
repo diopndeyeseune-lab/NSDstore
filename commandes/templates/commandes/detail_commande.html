@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Commande #{{ commande.numero }}{% endblock %}
+
+{% block content %}
+    <div class="commande-detail-entete">
+        <h1>Commande #{{ commande.numero }}</h1>
+        <span class="badge-statut badge-statut-{{ commande.statut|lower }}">{{ commande.get_statut_display }}</span>
+    </div>
+    <p class="commande-detail-date">Passée le {{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+
+    {% if commande.statut == 'ANNULEE' %}
+        <div class="progression-annulee">Cette commande a été annulée.</div>
+    {% else %}
+        <div class="progression">
+            <div class="etape {% if commande.etape_actuelle >= 1 %}active{% endif %}">
+                <span class="etape-point"></span>
+                <span class="etape-label">Commande passée</span>
+            </div>
+            <div class="etape {% if commande.etape_actuelle >= 2 %}active{% endif %}">
+                <span class="etape-point"></span>
+                <span class="etape-label">Paiement confirmé</span>
+            </div>
+            <div class="etape {% if commande.etape_actuelle >= 3 %}active{% endif %}">
+                <span class="etape-point"></span>
+                <span class="etape-label">Préparation</span>
+            </div>
+            <div class="etape {% if commande.etape_actuelle >= 4 %}active{% endif %}">
+                <span class="etape-point"></span>
+                <span class="etape-label">Expédition</span>
+            </div>
+            <div class="etape {% if commande.etape_actuelle >= 5 %}active{% endif %}">
+                <span class="etape-point"></span>
+                <span class="etape-label">Livraison</span>
+            </div>
+        </div>
+    {% endif %}
+
+    <h2>Produits</h2>
+    <ul class="commande-detail-produits">
+        {% for ligne in commande.lignes.all %}
+            <li>
+                {% with image=ligne.produit.images.first %}
+                    {% if image %}
+                        <img src="{{ image.image.url }}" alt="{{ ligne.produit.nom }}">
+                    {% endif %}
+                {% endwith %}
+                <span class="commande-detail-produit-nom">{{ ligne.produit.nom }}</span>
+                <span>Quantité : {{ ligne.quantite }}</span>
+                <span>{{ ligne.prix_unitaire }} FCFA</span>
+                <strong>{{ ligne.sous_total }} FCFA</strong>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="commande-detail-totaux">
+        <p>Sous-total : {{ commande.sous_total }} FCFA</p>
+        <p>Livraison ({{ commande.zone_livraison.nom }}) : {{ commande.frais_livraison }} FCFA</p>
+        <p class="commande-detail-total-final">Total : {{ commande.total }} FCFA</p>
+    </div>
+
+    <h2>Livraison</h2>
+    <p>{{ commande.prenom }} {{ commande.nom }}</p>
+    <p>{{ commande.adresse_livraison }}</p>
+    <p>Téléphone : {{ commande.telephone }}</p>
+    <p>Email : {{ commande.email_contact }}</p>
+    {% if commande.info_complementaire %}
+        <p>Info complémentaire : {{ commande.info_complementaire }}</p>
+    {% endif %}
+
+    <h2>Paiement</h2>
+    <p>Mode de paiement : {{ commande.get_mode_paiement_display|default:"Non renseigné" }}</p>
+
+    <div class="commande-detail-actions">
+        {% if not commande.mode_paiement %}
+            <a href="{% url 'commandes:page_paiement' commande.id %}">
+                <button type="button">Payer cette commande</button>
+            </a>
+        {% endif %}
+        <a href="{% url 'commandes:telecharger_recu' commande.id %}" target="_blank">Télécharger le reçu (PDF)</a>
+    </div>
+{% endblock %}

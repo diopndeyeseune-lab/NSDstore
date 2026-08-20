@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalogue{% endblock %}
+
+{% block content %}
+    <h1>{{ titre|default:"Nos produits" }}</h1>
+
+    <ul class="produits-grid">
+        {% for produit in page_obj %}
+            <li class="produit-card">
+                <a href="{% url 'catalogue:detail_produit' produit.slug %}">
+                    <div class="produit-card-image">
+                        {% with image_principale=produit.images.first %}
+                            {% if image_principale %}
+                                <img src="{{ image_principale.image.url }}" alt="{{ produit.nom }}">
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <h3>{{ produit.nom }}</h3>
+                    <p class="prix">{{ produit.prix }} FCFA</p>
+                    <span class="btn-voir">Voir</span>
+                </a>
+            </li>
+        {% empty %}
+            <li>Aucun produit disponible.</li>
+        {% endfor %}
+    </ul>
+
+    {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?q={{ q }}&page={{ page_obj.previous_page_number }}">&larr; Précédent</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?q={{ q }}&page={{ page_obj.next_page_number }}">Suivant &rarr;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

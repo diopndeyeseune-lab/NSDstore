@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ produit.nom }}{% endblock %}
+
+{% block content %}
+    <a href="{% url 'catalogue:liste_produits' %}">&larr; Retour au catalogue</a>
+
+    <h1>{{ produit.nom }}</h1>
+
+    {% with image_principale=produit.images.first %}
+        {% if image_principale %}
+            <img src="{{ image_principale.image.url }}" alt="{{ produit.nom }}" width="300">
+        {% endif %}
+    {% endwith %}
+
+    <p>Collection : <a href="{% url 'catalogue:produits_par_marque' produit.marque.slug %}">{{ produit.marque.nom }}</a></p>
+    <p>Catégories :
+        {% for categorie in produit.categories.all %}
+            <a href="{% url 'catalogue:produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    <p>{{ produit.description }}</p>
+    <p>Prix : {{ produit.prix }} FCFA</p>
+    <p>Stock : {{ produit.stock }}</p>
+
+    {% if produit.stock > 0 %}
+        <a href="{% url 'panier:ajouter_au_panier' produit.slug %}">
+            <button type="button">Ajouter au panier</button>
+        </a>
+    {% else %}
+        <button type="button" disabled>Rupture de stock</button>
+    {% endif %}
+{% endblock %}

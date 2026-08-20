@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #2b2b2b; font-size: 11pt; }
+        .en-tete { border-bottom: 2px solid #a9821f; padding-bottom: 12px; margin-bottom: 20px; }
+        .en-tete h1 { color: #2b2b2b; font-size: 20pt; margin: 0; }
+        .en-tete .sous-titre { color: #a9821f; font-size: 10pt; letter-spacing: 1px; }
+        .bloc-titre { font-size: 16pt; font-weight: bold; margin-bottom: 4px; }
+        .bloc-info { margin-bottom: 20px; }
+        .bloc-info td { padding: 2px 0; vertical-align: top; }
+        .bloc-info .label { color: #888; width: 140px; }
+        table.produits { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        table.produits th { background-color: #efeae0; color: #2b2b2b; text-align: left; padding: 8px; border-bottom: 1px solid #ddd6c4; }
+        table.produits td { padding: 8px; border-bottom: 1px solid #eee; }
+        table.totaux { width: 100%; margin-top: 10px; }
+        table.totaux td { padding: 4px 0; }
+        table.totaux .valeur { text-align: right; }
+        table.totaux .total-final td { font-size: 13pt; font-weight: bold; border-top: 2px solid #a9821f; padding-top: 8px; }
+        .pied { margin-top: 30px; text-align: center; color: #888; font-size: 9pt; }
+    </style>
+</head>
+<body>
+    <div class="en-tete">
+        <h1>Seunegui Shades</h1>
+        <div class="sous-titre">LUXURY EYEWEAR</div>
+    </div>
+
+    <div class="bloc-titre">Reçu de commande #{{ commande.numero }}</div>
+    <p>Date : {{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+
+    <table class="bloc-info">
+        <tr><td class="label">Client</td><td>{{ commande.prenom }} {{ commande.nom }}</td></tr>
+        <tr><td class="label">Téléphone</td><td>{{ commande.telephone }}</td></tr>
+        <tr><td class="label">Email</td><td>{{ commande.email_contact }}</td></tr>
+        <tr><td class="label">Adresse de livraison</td><td>{{ commande.adresse_livraison }} ({{ commande.zone_livraison.nom }})</td></tr>
+        <tr><td class="label">Mode de paiement</td><td>{{ commande.get_mode_paiement_display|default:"Non renseigné" }}</td></tr>
+        <tr><td class="label">Statut</td><td>{{ commande.get_statut_display }}</td></tr>
+    </table>
+
+    <table class="produits">
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Sous-total</th>
+        </tr>
+        {% for ligne in commande.lignes.all %}
+        <tr>
+            <td>{{ ligne.produit.nom }}</td>
+            <td>{{ ligne.quantite }}</td>
+            <td>{{ ligne.prix_unitaire }} FCFA</td>
+            <td>{{ ligne.sous_total }} FCFA</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table class="totaux">
+        <tr><td>Sous-total</td><td class="valeur">{{ commande.sous_total }} FCFA</td></tr>
+        <tr><td>Frais de livraison</td><td class="valeur">{{ commande.frais_livraison }} FCFA</td></tr>
+        <tr class="total-final"><td>Total payé</td><td class="valeur">{{ commande.total }} FCFA</td></tr>
+    </table>
+
+    <div class="pied">
+        Merci pour votre confiance — Seunegui Shades<br>
+        +221 76 022 99 54 · Dakar, Sénégal
+    </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmation email{% endblock %}
+
+{% block content %}
+    <h1>Confirme ton email</h1>
+    <p>Un code à 6 chiffres a été envoyé à ton adresse email. Saisis-le ci-dessous.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Confirmer</button>
+    </form>
+{% endblock %}

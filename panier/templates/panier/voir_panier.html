@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon panier{% endblock %}
+
+{% block content %}
+    <h1>Mon panier</h1>
+
+    <ul>
+        {% for ligne in panier.lignes.all %}
+            <li>{{ ligne.produit.nom }} - quantité : {{ ligne.quantite }} - sous-total : {{ ligne.sous_total }} FCFA</li>
+        {% empty %}
+            <li>Votre panier est vide.</li>
+        {% endfor %}
+    </ul>
+    <p>Total : {{ panier.total }} FCFA</p>
+
+    {% if panier.lignes.all %}
+    <a href="{% url 'commandes:checkout' %}">
+        <button type="button">Valider la commande</button>
+    </a>
+    {% endif %}
+{% endblock %}
