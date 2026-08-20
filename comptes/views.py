@@ -1,15 +1,34 @@
 import logging
 
+import requests
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 
 from .forms import CodeConfirmationForm, InscriptionForm
 from .models import ConfirmationEmail
 
 logger = logging.getLogger(__name__)
+
+
+def envoyer_email_confirmation(destinataire, code):
+    reponse = requests.post(
+        'https://api.brevo.com/v3/smtp/email',
+        headers={
+            'api-key': settings.BREVO_API_KEY,
+            'Content-Type': 'application/json',
+        },
+        json={
+            'sender': {'email': settings.DEFAULT_FROM_EMAIL},
+            'to': [{'email': destinataire}],
+            'subject': "Confirmez votre compte Seunegui Shades",
+            'textContent': f"Votre code de confirmation est : {code}",
+        },
+        timeout=10,
+    )
+    reponse.raise_for_status()
 
 
 def inscription(request):
@@ -31,16 +50,11 @@ def inscription(request):
             code = ConfirmationEmail.generer_code()
             ConfirmationEmail.objects.create(utilisateur=user, code=code)
             try:
-                send_mail(
-                    "Confirmez votre compte Seunegui Shades",
-                    f"Votre code de confirmation est : {code}",
-                    None,
-                    [user.email],
-                )
+                envoyer_email_confirmation(user.email, code)
             except Exception:
                 # L'inscription ne doit jamais echouer a cause d'un souci
-                # d'envoi d'email (SMTP lent/bloque, etc.) : le compte et le
-                # code existent deja en base, on continue le parcours.
+                # d'envoi d'email (API Brevo indisponible, etc.) : le compte
+                # et le code existent deja en base, on continue le parcours.
                 logger.exception("Echec de l'envoi de l'email de confirmation pour %s", user.username)
                 messages.warning(
                     request,

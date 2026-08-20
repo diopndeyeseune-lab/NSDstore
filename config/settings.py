@@ -135,6 +135,13 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 
+# Envoi des emails transactionnels (code de confirmation d'inscription) via
+# l'API HTTP de Brevo plutot que le SMTP Gmail : Gmail bloque/ralentit trop
+# souvent les connexions depuis les IP d'hebergeurs cloud comme Render, ce
+# qui provoquait des inscriptions bloquees. L'API HTTP (port 443, comme le
+# reste du site) evite ce probleme.
+BREVO_API_KEY = config('BREVO_API_KEY', default='')
+
 SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
 
 # Paiement Wave : cle secrete depuis le tableau de bord Wave Business
