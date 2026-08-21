@@ -27,6 +27,7 @@ urlpatterns = [
     path('panier/', include('panier.urls')),
     path('commandes/', include('commandes.urls')),
     path('comptes/', include('comptes.urls')),
+    path('', include('pages.urls')),
 ]
 
 if settings.DEBUG:

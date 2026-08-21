@@ -11,6 +11,31 @@ document.getElementById('btn-recherche').addEventListener('click', function () {
     document.getElementById('recherche-globale').classList.toggle('ouvert');
 });
 
+document.querySelectorAll('.btn-sous-menu').forEach(function (bouton) {
+    bouton.addEventListener('click', function () {
+        const sousMenu = document.getElementById(bouton.getAttribute('aria-controls'));
+        const ouvert = sousMenu.classList.toggle('ouvert');
+        bouton.setAttribute('aria-expanded', ouvert);
+        bouton.classList.toggle('ouvert', ouvert);
+    });
+});
+
+const btnProfil = document.getElementById('btn-profil');
+if (btnProfil) {
+    const dropdownProfil = document.getElementById('dropdown-profil');
+    btnProfil.addEventListener('click', function (evenement) {
+        evenement.stopPropagation();
+        const ouvert = dropdownProfil.classList.toggle('ouvert');
+        btnProfil.setAttribute('aria-expanded', ouvert);
+    });
+    document.addEventListener('click', function (evenement) {
+        if (!dropdownProfil.contains(evenement.target)) {
+            dropdownProfil.classList.remove('ouvert');
+            btnProfil.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
+
 document.querySelectorAll('input[type="password"]').forEach(function (input) {
     const wrapper = document.createElement('div');
     wrapper.className = 'password-wrapper';

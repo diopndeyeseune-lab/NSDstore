@@ -21,6 +21,11 @@ a:hover {
     text-decoration: underline;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 .topbar {
     display: flex;
     justify-content: space-between;
@@ -137,6 +142,100 @@ a:hover {
 .form-deconnexion button:hover {
     background: none;
     color: #a9821f;
+}
+
+.menu-item-ligne {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd6c4;
+}
+
+.menu-item-principal {
+    flex: 1;
+    border-bottom: none !important;
+}
+
+.btn-sous-menu {
+    background: none;
+    border: none;
+    color: #2b2b2b;
+    cursor: pointer;
+    padding: 12px 4px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-sous-menu .chevron {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.btn-sous-menu.ouvert .chevron {
+    transform: rotate(180deg);
+}
+
+.sous-menu {
+    max-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: max-height 0.25s ease;
+}
+
+.sous-menu.ouvert {
+    max-height: 600px;
+}
+
+.sous-menu a {
+    padding-left: 20px;
+    font-size: 0.92rem;
+    color: #6b6b6b;
+}
+
+.profil-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-profil {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    min-width: 180px;
+    background-color: #fff;
+    border: 1px solid #ddd6c4;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    padding: 6px 0;
+}
+
+.dropdown-profil.ouvert {
+    display: flex;
+}
+
+.dropdown-profil a {
+    padding: 10px 16px;
+    border-bottom: none;
+    color: #2b2b2b;
+}
+
+.dropdown-profil a:hover {
+    color: #a9821f;
+}
+
+.dropdown-profil .form-deconnexion {
+    border-top: 1px solid #ddd6c4;
+}
+
+.dropdown-profil .form-deconnexion button {
+    padding: 10px 16px;
+    border-bottom: none;
 }
 
 #btn-fermer-menu {
@@ -672,4 +771,111 @@ button:hover {
     margin-top: 16px;
     font-size: 0.9rem;
     color: #888;
+}
+
+/* ============================================================
+   Responsive mobile / tablette
+   Desktop (>= 1024px) : comportement inchange, regles au-dessus.
+   ============================================================ */
+
+/* Grille produits : points de rupture explicites plutot que de
+   laisser auto-fill entasser 3-4 cartes sur les petits ecrans. */
+@media (max-width: 599px) {
+    .produits-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 767px) {
+    .produits-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px 16px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .produits-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    body {
+        padding: 14px;
+    }
+
+    .topbar {
+        margin: -14px -14px 14px -14px;
+        padding: 10px 14px;
+    }
+
+    .site-footer {
+        margin: 40px -14px -14px -14px;
+    }
+
+    .recherche-globale {
+        margin: -14px -14px 14px -14px;
+    }
+
+    /* Logo un peu plus compact pour laisser de la place aux icones
+       sur les tres petits ecrans, sans changer l'identite visuelle. */
+    .logo img {
+        height: 64px;
+    }
+
+    /* Zones tactiles agrandies (recommandation ~44px) sans agrandir
+       visuellement les icones elles-memes. Le gap est elargi en
+       consequence pour que les zones tactiles voisines ne se
+       chevauchent pas. */
+    .topbar-right {
+        gap: 18px;
+    }
+
+    .icon-btn {
+        padding: 8px;
+        margin: -8px;
+    }
+
+    .menu-lateral {
+        width: min(260px, 85vw);
+    }
+
+    .btn-sous-menu {
+        padding: 12px 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 11px;
+        font-size: 1rem;
+    }
+
+    button {
+        padding: 12px 20px;
+    }
+
+    .password-toggle {
+        padding: 10px;
+        right: 0;
+    }
+
+    /* Lignes produit/actions en flex : eviter qu'elles s'ecrasent en
+       une seule rangee trop etroite sur petit ecran. */
+    .commande-detail-produits li,
+    .commande-detail-actions {
+        flex-wrap: wrap;
+    }
+
+    .commande-carte-entete {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Barre de progression de commande : libelles plus compacts
+       pour eviter un texte trop resserre sur 5 colonnes etroites. */
+    .etape-label {
+        font-size: 0.68rem;
+    }
 }
