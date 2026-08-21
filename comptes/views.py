@@ -5,12 +5,20 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.core import signing
 from django.shortcuts import redirect, render
 
 from .forms import CodeConfirmationForm, InscriptionForm
 from .models import ConfirmationEmail
 
 logger = logging.getLogger(__name__)
+
+# Sel de signature du jeton de confirmation. Le jeton porte l'identifiant du
+# compte a confirmer directement dans l'URL plutot que dans la session : une
+# session qui ne survit pas entre la page d'inscription et la page de
+# confirmation (navigateur integre WhatsApp/Instagram, cookies bloques...)
+# renvoyait sinon silencieusement vers l'inscription, sans aucun message.
+SEL_CONFIRMATION = 'comptes.confirmer_email'
 
 
 def envoyer_email_confirmation(destinataire, code):
@@ -61,16 +69,20 @@ def inscription(request):
                     "Votre compte a été créé mais l'email de confirmation n'a pas pu être envoyé. "
                     "Contactez-nous si vous ne recevez pas votre code."
                 )
-            request.session['utilisateur_a_confirmer'] = user.id
-            return redirect('comptes:confirmer_email')
+            token = signing.dumps(user.id, salt=SEL_CONFIRMATION)
+            return redirect('comptes:confirmer_email', token=token)
     else:
         form = InscriptionForm()
     return render(request, 'comptes/inscription.html', {'form': form})
 
 
-def confirmer_email(request):
-    user_id = request.session.get('utilisateur_a_confirmer')
-    if not user_id:
+def confirmer_email(request, token):
+    try:
+        # Valable 1h : largement suffisant pour saisir un code recu par email,
+        # tout en evitant qu'un lien tres ancien reste utilisable indefiniment.
+        user_id = signing.loads(token, salt=SEL_CONFIRMATION, max_age=3600)
+    except signing.BadSignature:
+        messages.error(request, "Ce lien de confirmation n'est plus valide. Merci de vous réinscrire.")
         return redirect('comptes:inscription')
 
     if request.method == 'POST':
@@ -84,7 +96,6 @@ def confirmer_email(request):
                 user.is_active = True
                 user.save()
                 confirmation.delete()
-                del request.session['utilisateur_a_confirmer']
                 login(request, user)
                 return redirect('catalogue:liste_produits')
             messages.error(request, "Code incorrect.")
