@@ -123,6 +123,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_URL = 'comptes:login'
 LOGIN_REDIRECT_URL = 'catalogue:liste_produits'
+LOGOUT_REDIRECT_URL = 'catalogue:liste_produits'
+
+# Reduit le risque qu'une session (notamment admin) reste active sur un
+# appareil partage : le cookie de session expire a la fermeture complete
+# du navigateur, plutot que de persister plusieurs semaines par defaut.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
