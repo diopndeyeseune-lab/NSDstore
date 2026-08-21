@@ -4,9 +4,50 @@
 
 {% block content %}
     <h1>Créer un compte</h1>
-    <form method="post">
+    <form method="post" id="form-inscription">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
+
+        <p class="methode-inscription-titre">{{ form.methode.label }}</p>
+        <div class="methode-inscription">
+            {% for radio in form.methode %}
+                <label class="methode-inscription-option">
+                    {{ radio.tag }}
+                    <span>{{ radio.choice_label }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        {{ form.methode.errors }}
+
+        <div class="champ-methode" data-champ="email">
+            <p>
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {{ form.email.errors }}
+            </p>
+        </div>
+        <div class="champ-methode" data-champ="telephone">
+            <p>
+                {{ form.telephone.label_tag }}
+                {{ form.telephone }}
+                <span class="helptext">{{ form.telephone.help_text }}</span>
+                {{ form.telephone.errors }}
+            </p>
+        </div>
+
+        <p>
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            <span class="helptext">{{ form.password1.help_text }}</span>
+            {{ form.password1.errors }}
+        </p>
+        <p>
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            <span class="helptext">{{ form.password2.help_text }}</span>
+            {{ form.password2.errors }}
+        </p>
+
         <button type="submit">S'inscrire</button>
     </form>
     <p class="lien-auth-croise">Vous avez déjà un compte ? <a href="{% url 'comptes:login' %}">Se connecter</a></p>

@@ -8,8 +8,10 @@ from django.contrib.auth.models import User
 from django.core import signing
 from django.shortcuts import redirect, render
 
+from commandes.sms import SMSNonConfigure, envoyer_sms
+
 from .forms import CodeConfirmationForm, InscriptionForm
-from .models import ConfirmationEmail
+from .models import ConfirmationEmail, ConfirmationTelephone
 
 logger = logging.getLogger(__name__)
 
@@ -43,32 +45,60 @@ def inscription(request):
     if request.method == 'POST':
         form = InscriptionForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            ancien_compte_inactif = User.objects.filter(username=email, is_active=False).first()
+            methode = form.cleaned_data['methode']
+            identifiant = form.cleaned_data['identifiant']
+            ancien_compte_inactif = User.objects.filter(username=identifiant, is_active=False).first()
             if ancien_compte_inactif:
                 # Compte cree lors d'une tentative precedente jamais confirmee
-                # (ex. email de confirmation non recu) : on le reinitialise
+                # (ex. code de confirmation non recu) : on le reinitialise
                 # avec le nouveau mot de passe plutot que de bloquer l'utilisateur.
                 user = ancien_compte_inactif
                 user.set_password(form.cleaned_data['password1'])
                 user.save()
                 ConfirmationEmail.objects.filter(utilisateur=user).delete()
+                ConfirmationTelephone.objects.filter(utilisateur=user).delete()
             else:
                 user = form.save()
-            code = ConfirmationEmail.generer_code()
-            ConfirmationEmail.objects.create(utilisateur=user, code=code)
-            try:
-                envoyer_email_confirmation(user.email, code)
-            except Exception:
-                # L'inscription ne doit jamais echouer a cause d'un souci
-                # d'envoi d'email (API Brevo indisponible, etc.) : le compte
-                # et le code existent deja en base, on continue le parcours.
-                logger.exception("Echec de l'envoi de l'email de confirmation pour %s", user.username)
-                messages.warning(
-                    request,
-                    "Votre compte a été créé mais l'email de confirmation n'a pas pu être envoyé. "
-                    "Contactez-nous si vous ne recevez pas votre code."
-                )
+
+            if methode == 'email':
+                code = ConfirmationEmail.generer_code()
+                ConfirmationEmail.objects.create(utilisateur=user, code=code)
+                try:
+                    envoyer_email_confirmation(user.email, code)
+                except Exception:
+                    # L'inscription ne doit jamais echouer a cause d'un souci
+                    # d'envoi d'email (API Brevo indisponible, etc.) : le compte
+                    # et le code existent deja en base, on continue le parcours.
+                    logger.exception("Echec de l'envoi de l'email de confirmation pour %s", user.username)
+                    messages.warning(
+                        request,
+                        "Votre compte a été créé mais l'email de confirmation n'a pas pu être envoyé. "
+                        "Contactez-nous si vous ne recevez pas votre code."
+                    )
+            else:
+                code = ConfirmationTelephone.generer_code()
+                ConfirmationTelephone.objects.create(utilisateur=user, code=code)
+                message = f"Seunegui Shades : votre code de confirmation est {code}"
+                try:
+                    envoyer_sms(identifiant, message)
+                except SMSNonConfigure:
+                    # Meme logique que l'email : l'inscription ne doit jamais
+                    # echouer a cause d'un souci d'envoi. Twilio n'est pas
+                    # encore configure en production.
+                    logger.info("SMS de confirmation non envoye pour %s : Twilio n'est pas configure.", user.username)
+                    messages.warning(
+                        request,
+                        "Votre compte a été créé mais le SMS de confirmation n'a pas pu être envoyé. "
+                        "Contactez-nous si vous ne recevez pas votre code."
+                    )
+                except Exception:
+                    logger.exception("Echec de l'envoi du SMS de confirmation pour %s", user.username)
+                    messages.warning(
+                        request,
+                        "Votre compte a été créé mais le SMS de confirmation n'a pas pu être envoyé. "
+                        "Contactez-nous si vous ne recevez pas votre code."
+                    )
+
             token = signing.dumps(user.id, salt=SEL_CONFIRMATION)
             return redirect('comptes:confirmer_email', token=token)
     else:
@@ -88,9 +118,11 @@ def confirmer_email(request, token):
     if request.method == 'POST':
         form = CodeConfirmationForm(request.POST)
         if form.is_valid():
-            confirmation = ConfirmationEmail.objects.filter(
-                utilisateur_id=user_id, code=form.cleaned_data['code']
-            ).first()
+            code = form.cleaned_data['code']
+            confirmation = (
+                ConfirmationEmail.objects.filter(utilisateur_id=user_id, code=code).first()
+                or ConfirmationTelephone.objects.filter(utilisateur_id=user_id, code=code).first()
+            )
             if confirmation:
                 user = confirmation.utilisateur
                 user.is_active = True

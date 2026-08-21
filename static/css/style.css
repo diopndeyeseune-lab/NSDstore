@@ -773,6 +773,44 @@ button:hover {
     color: #888;
 }
 
+.methode-inscription-titre {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.methode-inscription {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.methode-inscription-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 1px solid #e2ddd0;
+    border-radius: 20px;
+    cursor: pointer;
+    background-color: #fff;
+    font-weight: normal;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.methode-inscription-option:has(input:checked) {
+    border-color: #a9821f;
+    background-color: #f4f0e8;
+}
+
+.methode-inscription-option input {
+    accent-color: #a9821f;
+}
+
+.champ-methode[hidden] {
+    display: none;
+}
+
 /* ============================================================
    Responsive mobile / tablette
    Desktop (>= 1024px) : comportement inchange, regles au-dessus.

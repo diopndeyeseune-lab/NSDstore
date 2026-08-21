@@ -36,6 +36,25 @@ if (btnProfil) {
     });
 }
 
+const formInscription = document.getElementById('form-inscription');
+if (formInscription) {
+    const radiosMethode = formInscription.querySelectorAll('input[name="methode"]');
+    const champsMethode = formInscription.querySelectorAll('.champ-methode');
+
+    function majChampsMethode() {
+        const coche = formInscription.querySelector('input[name="methode"]:checked');
+        const methode = coche ? coche.value : null;
+        champsMethode.forEach(function (champ) {
+            champ.hidden = champ.dataset.champ !== methode;
+        });
+    }
+
+    radiosMethode.forEach(function (radio) {
+        radio.addEventListener('change', majChampsMethode);
+    });
+    majChampsMethode();
+}
+
 document.querySelectorAll('input[type="password"]').forEach(function (input) {
     const wrapper = document.createElement('div');
     wrapper.className = 'password-wrapper';
